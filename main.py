@@ -2,6 +2,9 @@ import os
 from fastapi import FastAPI, File, HTTPException, UploadFile
 import subprocess
 import json
+from pathlib import Path
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
 
@@ -9,7 +12,24 @@ from pdf_extractor import extract_transactions_from_pdf
 
 app = FastAPI()
 
-app.mount("/ui", StaticFiles(directory="ui"), name="ui")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.mount("/upload", StaticFiles(directory="ui"), name="upload")
+react_build_folder = Path(__file__).parent / "finance-app" / "build"
+
+@app.get("/ui/{path:path}")
+def serve_root(path: str):
+    file_path = react_build_folder / path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(file_path)
+    return FileResponse(react_build_folder / "index.html")
 
 @app.post("/transaction/")
 def create_transaction(transaction: dict):
