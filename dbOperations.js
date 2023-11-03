@@ -7,6 +7,7 @@ const arg1 = JSON.parse(process.argv[3] || '{}');
 const arg2 = JSON.parse(process.argv[4] || '{}');
 
 if (operation === 'insert') {
+    console.log(arg1);
     db.insert(arg1, (err, newDoc) => {
         if (err) throw err;
         console.log(JSON.stringify(newDoc));

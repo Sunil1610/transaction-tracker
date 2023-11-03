@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from pdf_extractor import extract_transactions_from_pdf
+import dbService as db
 
 app = FastAPI()
 
@@ -33,28 +34,19 @@ def serve_root(path: str):
 
 @app.post("/transaction/")
 def create_transaction(transaction: dict):
-    result = subprocess.check_output(["node", "dbOperations.js", "insert", json.dumps(transaction)])
-    return json.loads(result)
+    return db.create_transaction(transaction);
 
 @app.put("/transaction/")
 def update_transaction(query: dict, update_data: dict):
-    result = subprocess.check_output(["node", "dbOperations.js", "update", json.dumps(query), json.dumps(update_data)])
-    return {"numReplaced": int(result)}
+    return db.update_transaction(query, update_data);
 
 @app.delete("/transaction/")
 def delete_transaction(query: dict):
-    result = subprocess.check_output(["node", "dbOperations.js", "delete", json.dumps(query)])
-    return {"numRemoved": int(result)}
-
-@app.delete("/transaction/")
-def delete_transaction(query: dict):
-    result = subprocess.check_output(["node", "dbOperations.js", "delete", json.dumps(query)])
-    return {"numRemoved": int(result)}
+    return db.delete_transaction(query)
 
 @app.get("/transactions/")
 def find_transactions(query: dict = {}):
-    result = subprocess.check_output(["node", "dbOperations.js", "find", json.dumps(query)])
-    return json.loads(result)
+    return db.find_transactions(query)
 
 @app.post("/api/upload/")
 async def upload_files(files: list[UploadFile] = File(...)):

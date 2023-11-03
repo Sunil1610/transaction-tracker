@@ -2,7 +2,7 @@ import io
 import re
 from fastapi import HTTPException
 import PyPDF2
-
+import dbService as db
 from transactions import create_transaction
 
 def extract_transactions_from_pdf(file_content: bytes) -> str:
@@ -15,9 +15,10 @@ def extract_transactions_from_pdf(file_content: bytes) -> str:
         for page_num in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[page_num]
             text_content += page.extract_text()
-        type = get_source(text_content)
-        if(type != "") :
-            delimiters = get_delimiters(type)
+        source = get_source(text_content)
+        transactions = []
+        if(source != "") :
+            delimiters = get_delimiters(source)
             if(delimiters != "") :
                 pattern = "|".join(map(re.escape, delimiters))
                 parts = re.split(pattern, text_content)
@@ -27,12 +28,14 @@ def extract_transactions_from_pdf(file_content: bytes) -> str:
                     pattern = r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}"
                     if(bool(re.match(pattern, tran_str))) :
                         transactionList+= "\n" + tran_str
-                parse_and_save(transactionList)
+                transactions = parse(transactionList, source)
+        for transaction in transactions :
+            db.create_transaction(transaction)
     except Exception as e:
         raise HTTPException(detail=f"Error processing PDF: {str(e)}", status_code=400)
     return text_content
 
-def parse_and_save(tran_str) :
+def parse(tran_str, source) :
     transactions = tran_str.split("\n")
     entries = []
     for line in transactions:
@@ -40,27 +43,27 @@ def parse_and_save(tran_str) :
         is_credit_transaction = line.endswith(" Cr")
         if is_credit_transaction:
             line = line[:-3]
-        transaction = parse_transaction(line, is_credit_transaction)
+        transaction = parse_transaction(line, is_credit_transaction, source)
         if transaction:
             entries.append(transaction)
-    print(entries)        
+    return entries  
 
 def remove_leading_special_chars(s):
     return re.sub(r"^[^A-Za-z0-9]+", "", s)
 
 def get_source(text) :
-    if("Diners Club International Credit Card" in text) : return "DINERS";
-    if("SWIGGY ORANGE CARD" in text) : return "SWIGGY";
+    if("Diners Club International Credit Card" in text) : return "DINERS_CRED_CARD";
+    if("SWIGGY ORANGE CARD" in text) : return "SWIGGY_CRED_CARD";
     
     return "";
 
 def get_delimiters(type) :
-    if(type == "DINERS") : return ["ANGARA SUNIL", "Reward Points Summary", "Diners Club"]
-    if(type == "SWIGGY") : return ["ANGARA CHANDRA", "Reward Points Summary", "SWIGGY ORANGE CARD", "Swiggy Cashback Summary"]
+    if(type == "DINERS_CRED_CARD") : return ["ANGARA SUNIL", "Reward Points Summary", "Diners Club"]
+    if(type == "SWIGGY_CRED_CARD") : return ["ANGARA CHANDRA", "Reward Points Summary", "SWIGGY ORANGE CARD", "Swiggy Cashback Summary"]
     
     return "";
 
-def parse_transaction(line, is_credit_transaction):
+def parse_transaction(line, is_credit_transaction, source):
     patterns = [
         (r'(\d{2}/\d{2}/\d{4}) (\d{2}:\d{2}:\d{2}) ([A-Z0-9a-z\s.]+) ([A-Z0-9a-z\s.]+) (\d+\.?\d{0,2})',
          lambda groups: {"Date": groups[0], "Time": groups[1], "Description": f"{groups[2].strip()} {groups[3].strip()}", "Amount": groups[4]}),
@@ -79,7 +82,7 @@ def parse_transaction(line, is_credit_transaction):
         match = re.match(pattern, line)
         if match:
             transaction = mapper(match.groups())
-            transaction = create_transaction(transaction, is_credit_transaction)
+            transaction = create_transaction(transaction, is_credit_transaction, source)
             return transaction
     return None
 
