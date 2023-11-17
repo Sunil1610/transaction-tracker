@@ -10,6 +10,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nedb": "^1.8.0"
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/lab": "^5.0.0-alpha.153",
+    "@mui/material": "^5.14.18",
+    "@mui/x-date-pickers": "^6.18.1",
+    "@mui/x-date-pickers-pro": "^6.18.1",
+    "date-fns": "^2.30.0",
+    "dayjs": "^1.11.10",
+    "mui": "^0.0.1",
+    "nedb": "^1.8.0",
+    "react-datepicker": "^4.21.0"
   }
 }

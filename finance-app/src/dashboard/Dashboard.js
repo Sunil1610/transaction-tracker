@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
@@ -24,19 +24,7 @@ import Orders from './Orders';
 import TransactionsProvider from '../TransactionsProvider';
 import Button from '@mui/material/Button';
 import axios from 'axios';
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+import TransactionsContext from '../TransactionsContext';
 
 const drawerWidth = 240;
 
@@ -84,7 +72,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-// TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
@@ -154,6 +141,7 @@ export default function Dashboard() {
                 ref={fileInputRef}
                 style={{ display: 'none' }}
                 onChange={handleFileUpload}
+                multiple
               />
               <Button
                 variant="contained"
@@ -237,7 +225,6 @@ export default function Dashboard() {
                   </Paper>
                 </Grid>
               </Grid>
-              <Copyright sx={{ pt: 4 }} />
             </Container>
           </Box>
         </Box>
