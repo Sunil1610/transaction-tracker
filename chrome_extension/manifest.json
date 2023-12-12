@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Transaction Reader",
+  "version": "1.0",
+  "description": "Reads transactions from web pages and logs them to the console.",
+  "permissions": ["activeTab", "cookies", "*://*"],
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"]
+  }],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon.png"
+    }
+  }
+}

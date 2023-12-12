@@ -13,6 +13,7 @@ from splitwise_parser import extract_transactions_from_splitwise
 from pdf_extractor import extract_transactions_from_pdf
 import dbService as db
 from text_file_parser import extract_transactions_from_text_file
+from transaction_processor import tag_transactions
 
 app = FastAPI()
 
@@ -81,6 +82,12 @@ async def upload_amazon_tran(amazon_transactions: List[str]):
 async def upload_amazon_tran(splitwise_transactions: List[dict]):
     # Logic to handle and save the uploaded files...
     extract_transactions_from_splitwise(splitwise_transactions)
+
+
+@app.post("/api/tag/splitwise")
+async def tag_transactions(query: dict = {}):
+    # Logic to handle and save the uploaded files...
+    tag_transactions(query)
 
 
 # Add other CRUD operations as needed...
