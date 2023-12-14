@@ -8,12 +8,12 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
-from amazon_pay_parser import extract_transactions_from_amazon
-from splitwise_parser import extract_transactions_from_splitwise
-from pdf_extractor import extract_transactions_from_pdf
+from parsers.amazon_pay_parser import extract_transactions_from_amazon
+from parsers.splitwise_parser import extract_transactions_from_splitwise
+from parsers.pdf_extractor import extract_transactions_from_pdf
 import dbService as db
-from text_file_parser import extract_transactions_from_text_file
-from transaction_processor import tag_transactions
+from parsers.text_file_parser import extract_transactions_from_text_file
+from transaction_processor import *
 
 app = FastAPI()
 
@@ -66,22 +66,24 @@ async def upload_files(files: list[UploadFile] = File(...)):
         file_content_as_bytes = await file.read()
         content_type = file.content_type
         if "pdf" in content_type:
-            extract_transactions_from_pdf(file_content_as_bytes)
+            extract_transactions_from_pdf(file_content_as_bytes, file.filename)
         elif "text" in content_type:
             extract_transactions_from_text_file(file_content_as_bytes, file.filename)
     return {"message": "Files uploaded successfully!"}
 
 
 @app.post("/api/upload/amazon_pay")
-async def upload_amazon_tran(amazon_transactions: List[str]):
-    # Logic to handle and save the uploaded files...
+async def upload_amazon_tran(amazon_transactions: List[dict]):
     extract_transactions_from_amazon(amazon_transactions)
 
 
 @app.post("/api/upload/splitwise")
-async def upload_amazon_tran(splitwise_transactions: List[dict]):
-    # Logic to handle and save the uploaded files...
+async def upoad_splitwise_tran(splitwise_transactions: List[dict]):
     extract_transactions_from_splitwise(splitwise_transactions)
+
+@app.post("/api/process/splitwise")
+async def process_splitwise_expenses():
+    insert_splitwise_expenses()
 
 
 @app.post("/api/tag/splitwise")

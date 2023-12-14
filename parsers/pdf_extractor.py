@@ -6,7 +6,7 @@ import dbService as db
 from transactions import create_transaction
 from utils import remove_leading_special_chars
 
-def extract_transactions_from_pdf(file_content: bytes) -> str:
+def extract_transactions_from_pdf(file_content: bytes, file_name: str) -> str:
     text_content = ""
     try:
         # Use BytesIO to read the byte content as a file
@@ -16,7 +16,7 @@ def extract_transactions_from_pdf(file_content: bytes) -> str:
         for page_num in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[page_num]
             text_content += page.extract_text()
-        source = get_source(text_content)
+        source = get_source(text_content, file_name)
         transactions = []
         if(source != "") :
             delimiters = get_delimiters(source)
@@ -49,10 +49,10 @@ def parse(tran_str, source) :
             entries.append(transaction)
     return entries  
 
-def get_source(text) :
+def get_source(text, filename : str) :
     if("Diners Club International Credit Card" in text) : return "DINERS_CRED_CARD";
     if("SWIGGY ORANGE CARD" in text) : return "SWIGGY_CRED_CARD";
-    
+    if(filename.lower().startswith("swiggy")) : return "SWIGGY_CRED_CARD";
     return ""
 
 def get_delimiters(type) :

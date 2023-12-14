@@ -3,7 +3,7 @@ from pymongo import MongoClient
 class DatabaseManager:
     def __init__(self):
         self.client = MongoClient('mongodb://localhost:27017/')
-        self.db = self.client['trnsactions']
+        self.db = self.client['finances_tracker']
         self.splitwise = self.db['splitwise_entries']
         self.transactions = self.db['transactions']
 
@@ -15,6 +15,7 @@ class DatabaseManager:
 
     def find_document(self, query, collection):
         collection = self.get_collection(collection)
+        
         document = collection.find_one(query)
         if(document != None) :
             document.update({"_id": str(document.get("_id"))})

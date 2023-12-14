@@ -5,9 +5,9 @@ from transactions import create_transaction_with_time
 import dbService as db
 
 
-def extract_transactions_from_amazon(transactions: List[str]) :
+def extract_transactions_from_amazon(transactions: List[dict]) :
     for transaction in transactions :
-        form_transaction((transaction))
+        form_transaction(transaction["transaction"], transaction["additionalDetails"])
 
 
 transaction_pattern = re.compile(
@@ -16,7 +16,7 @@ transaction_pattern = re.compile(
         r'([+-])\s*₹([\d,]+\.*\d*)'  # Transaction sign and amount
     )
 
-def form_transaction(transaction_str: str) :
+def form_transaction(transaction_str: str, additionalDetails: List[str]) :
     # Regular expression to match transaction details
     # Group 1: Description
     # Group 2: Date
@@ -40,6 +40,7 @@ def form_transaction(transaction_str: str) :
         date_time = datetime.strptime(f"{date_str}, {time_str}", "%d %b %Y, %I:%M %p")
         formatted_date = date_time.strftime('%d/%m/%Y')
         transaction = create_transaction_with_time(description, amount, formatted_date, sign, "AMAZON_PAY", time_str)
+        transaction["additionalDetails"] = additionalDetails
         db.create_transaction(transaction, "transactions")
     except Exception as e:
         print("Error processing transaction " + str(e))

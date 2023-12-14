@@ -39,12 +39,22 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       const transactionData = [];
       if (transactions.length > 0) {
         transactions.forEach((transaction) => {
-          transactionData.push(transaction.innerText.trim());
+          additionalDetails = [];
+          transaction.querySelectorAll('.a-row.pad-mini-details-text').forEach(
+            (node)=>{
+              additionalDetails.push(node.innerText.trim().replace(/\s+/g, ' '));
+          });
+          const transactionDetails = {
+            "transaction_str" : transaction.innerText.trim(),
+            additionalDetails
+          }
+          transactionData.push( transactionDetails );
         });
-        console.log('Transactions:', transactionData);
+        // console.log('Transactions:', transactionData);
       } else {
         console.log('No transactions found on this page.');
       }
+      console.log(transactionData)
       fetch('http://localhost:8000/api/upload/amazon_pay', {
         method: 'POST',
         headers: {
