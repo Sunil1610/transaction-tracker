@@ -7,7 +7,7 @@ import dbService as db
 
 def extract_transactions_from_amazon(transactions: List[dict]) :
     for transaction in transactions :
-        form_transaction(transaction["transaction"], transaction["additionalDetails"])
+        form_transaction(transaction["transaction_str"], transaction["additionalDetails"])
 
 
 transaction_pattern = re.compile(
