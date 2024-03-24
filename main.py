@@ -11,8 +11,10 @@ from fastapi.staticfiles import StaticFiles
 from parsers.amazon_pay_parser import extract_transactions_from_amazon
 from parsers.splitwise_parser import extract_transactions_from_splitwise
 from parsers.pdf_extractor import extract_transactions_from_pdf
+from parsers.pdf_extractor_json import readEmails
 import dbService as db
 from parsers.text_file_parser import extract_transactions_from_text_file
+from processors.transaction_tagger import parse_transactions_to_number
 from transaction_processor import *
 
 app = FastAPI()
@@ -71,10 +73,21 @@ async def upload_files(files: list[UploadFile] = File(...)):
             extract_transactions_from_text_file(file_content_as_bytes, file.filename)
     return {"message": "Files uploaded successfully!"}
 
+@app.post("/mail/get/")
+async def upload_files(extractor: str, limit: int):
+    # Logic to handle and save the uploaded files...
+    readEmails(extractor, limit)
+    return {"message": "Files uploaded successfully!"}
+
 
 @app.post("/api/upload/amazon_pay")
 async def upload_amazon_tran(amazon_transactions: List[dict]):
     extract_transactions_from_amazon(amazon_transactions)
+
+
+@app.post("/api/process/transactions")
+async def process_tran():
+    parse_transactions_to_number()
 
 
 @app.post("/api/upload/splitwise")

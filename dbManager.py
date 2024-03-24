@@ -13,6 +13,10 @@ class DatabaseManager:
             return collection.insert_one(document)
         return document
 
+    def replace_document(self, filter, document, collection):
+        collection = self.get_collection(collection)
+        return collection.replace_one(filter, document)
+
     def find_document(self, query, collection):
         collection = self.get_collection(collection)
         

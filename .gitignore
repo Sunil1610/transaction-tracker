@@ -165,3 +165,9 @@ cython_debug/
 *env*
 node_modules/*
 env*
+credentials.json
+token.json
+.vscode/launch.json
+__pycache__/main.cpython-311.pyc
+.vscode/launch.json
+__pycache__/main.cpython-311.pyc

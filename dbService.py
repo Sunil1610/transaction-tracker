@@ -21,6 +21,13 @@ def update_transaction(query: dict, update_data: dict, collection: str):
     except Exception as e:
         raise HTTPException(detail=f"Error updating transaction: {str(e)}", status_code=400)
 
+def replace_transaction(query: dict, update_data: dict, collection: str):
+    try:
+        result = db_manager.replace_document(query, update_data, collection)
+        return {"numReplaced": result.modified_count}
+    except Exception as e:
+        raise HTTPException(detail=f"Error updating transaction: {str(e)}", status_code=400)
+
 def delete_transaction(query: dict, collection: str):
     try:
         result = db_manager.delete_transaction(query, collection)
