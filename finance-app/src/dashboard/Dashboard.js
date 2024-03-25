@@ -20,7 +20,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 import Chart from './Chart';
 import Deposits from './Deposits';
-import Orders from './Orders';
+import Transactions from './Transactions';
 import TransactionsProvider from '../TransactionsProvider';
 import Button from '@mui/material/Button';
 import axios from 'axios';
@@ -75,7 +75,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
     setOpen(!open);
   };
@@ -221,7 +221,7 @@ export default function Dashboard() {
                 {/* Recent Orders */}
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                    <Orders />
+                    <Transactions />
                   </Paper>
                 </Grid>
               </Grid>

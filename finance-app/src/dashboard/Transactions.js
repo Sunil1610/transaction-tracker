@@ -5,19 +5,10 @@ import TransactionsContext from '../TransactionsContext';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import ButtonRenderer from './GridButtonRenderer.js';
+import './grid.css'
 
-
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, date, name, shipTo, paymentMethod, amount };
-}
-
-function preventDefault(event) {
-  event.preventDefault();
-}
-
-
-export default function Orders() {
+export default function Transactions() {
   const rows = useContext(TransactionsContext);
 
   if (!rows) {
@@ -45,6 +36,11 @@ export default function Orders() {
     { field: 'Type', headerName: 'Type', sortable: true, resizable: true, filter: true },
     { field: 'Source', headerName: 'Source', sortable: true, resizable: true, filter: true },
     { field: 'Amount', headerName: 'Amount', sortable: true, resizable: true, filter: true },
+    {
+      field: 'Action', headerName: "Action",
+      resizable: true, filter: true ,
+      cellRenderer: ButtonRenderer
+    }
   ];
 
   return (
@@ -54,6 +50,7 @@ export default function Orders() {
         <AgGridReact
           rowData={rows}
           columnDefs={columns}
+          frameworkComponents={{ButtonRenderer}}
           pagination={true}
           paginationPageSize={10}
         />
