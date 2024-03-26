@@ -1,18 +1,19 @@
 import * as React from 'react';
-import { useContext } from 'react';
-import Title from './Title';
-import TransactionsContext from '../TransactionsContext';
+import { useContext, useRef } from 'react';
+import Title from './Title.tsx';
+import TransactionsContext from '../TransactionsContext.tsx';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import ButtonRenderer from './GridButtonRenderer.js';
+import ButtonRenderer from './GridButtonRenderer.tsx';
 import './grid.css'
+import { GridApi } from 'ag-grid-community';
 
 export default function Transactions() {
-  const rows = useContext(TransactionsContext);
-
+  var rows: any[] = useContext(TransactionsContext);
+  const gridRef = useRef<GridApi | null>(null);
   if (!rows) {
-    rows = []
+    rows = [];
   } else if (rows.length > 0) {
     console.log(rows);
     rows.forEach(element => {
@@ -20,6 +21,10 @@ export default function Transactions() {
     });
   }
 
+  const onGridReady = (params) => {
+    console.log(params.api.autoSizeAllColumns(true));
+    console.log(params.api);
+  };
   
   const columns = [
     {
@@ -30,7 +35,7 @@ export default function Transactions() {
       resizable: true,
       valueGetter: (params) => (new Date(params.data.timestamp * 1000)).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
       comparator: (v1, v2) =>
-        new Date(v1) - new Date(v2)
+      new Date(v1).getTime() - new Date(v2).getTime()
     },
     { field: 'Description', headerName: 'Description', sortable: true, resizable: true, filter: true },
     { field: 'Type', headerName: 'Type', sortable: true, resizable: true, filter: true },
@@ -50,9 +55,17 @@ export default function Transactions() {
         <AgGridReact
           rowData={rows}
           columnDefs={columns}
-          frameworkComponents={{ButtonRenderer}}
+          components={{ButtonRenderer}}
           pagination={true}
+          ref={gridRef}
           paginationPageSize={10}
+          onGridReady={onGridReady}
+          onFirstDataRendered={() => {
+            console.log("onFirstDataRendered");
+            if (gridRef.current) {
+              gridRef.current.columnApi.autoSizeAllColumns(true);
+            }
+          }}
         />
       </div>
     </React.Fragment>

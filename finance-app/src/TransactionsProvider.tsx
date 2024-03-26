@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import TransactionsContext from './TransactionsContext';
+import TransactionsContext from './TransactionsContext.tsx';
 
 const TransactionsProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);

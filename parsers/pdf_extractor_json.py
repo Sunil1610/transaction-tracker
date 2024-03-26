@@ -9,6 +9,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from google.auth.exceptions import RefreshError
 import logging
 import requests
 
@@ -29,15 +30,20 @@ def readEmails(extractor:str, limit:int):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES, redirect_uri='http://localhost:9000/')
-            creds = flow.run_local_server(port=9000)
-        # Save the credentials for the next run
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            refreshToken = False
+            if creds and creds.expired and creds.refresh_token:
+                try:
+                    creds.refresh(Request())
+                    refreshToken = True
+                except RefreshError as error:
+                    print(f'An error occurred: {error}')
+            if not refreshToken:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'credentials.json', SCOPES, redirect_uri='http://localhost:9000/')
+                creds = flow.run_local_server(port=9000)
+            # Save the credentials for the next run
+            with open('token.json', 'w') as token:
+                token.write(creds.to_json())
     
     if os.path.exists('./parsers/mail_parser_config.json') :
         with open('./parsers/mail_parser_config.json', 'r') as file:
@@ -85,6 +91,7 @@ def readEmails(extractor:str, limit:int):
                                 transaction["Source"] = source
                                 transaction["Type"] = mail_parser_config[extractor]['tran_type']
                                 transaction["timestamp"] = get_timestamp(transaction['Date'], transaction['Time'])
+                                transaction['Amount'] = float(transaction['Amount'])
                                 count = count + 1
                                 db.create_transaction(transaction, "transactions")
                                 print (transaction)

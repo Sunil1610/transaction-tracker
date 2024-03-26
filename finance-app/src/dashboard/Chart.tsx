@@ -1,8 +1,8 @@
 import React, {useContext} from 'react';
 import { useTheme } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, Label, ResponsiveContainer } from 'recharts';
-import Title from './Title';
-import TransactionsContext from '../TransactionsContext';
+import Title from './Title.tsx';
+import TransactionsContext from '../TransactionsContext.tsx';
 
 // Generate Sales Data
 function createData(time, amount) {

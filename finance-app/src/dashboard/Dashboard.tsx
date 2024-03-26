@@ -1,5 +1,6 @@
 import React, { useContext, useRef } from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
+import { AppBarProps } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
@@ -17,34 +18,38 @@ import Link from '@mui/material/Link';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
-import Chart from './Chart';
-import Deposits from './Deposits';
-import Transactions from './Transactions';
-import TransactionsProvider from '../TransactionsProvider';
+import { mainListItems, secondaryListItems } from './listItems.tsx';
+import Chart from './Chart.tsx';
+import Deposits from './Deposits.tsx';
+import Transactions from './Transactions.tsx';
+import TransactionsProvider from '../TransactionsProvider.tsx';
 import Button from '@mui/material/Button';
 import axios from 'axios';
-import TransactionsContext from '../TransactionsContext';
+import TransactionsContext from '../TransactionsContext.tsx';
 
 const drawerWidth = 240;
 
+interface ExtendedAppBarProps extends AppBarProps {
+  open: boolean;
+ }
+
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
+ })<ExtendedAppBarProps>(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
   transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
+     easing: theme.transitions.easing.sharp,
+     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
+     marginLeft: drawerWidth,
+     width: `calc(100% - ${drawerWidth}px)`,
+     transition: theme.transitions.create(['width', 'margin'], {
+       easing: theme.transitions.easing.sharp,
+       duration: theme.transitions.duration.enteringScreen,
+     }),
   }),
-}));
+ }));
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -79,15 +84,19 @@ export default function Dashboard() {
   const toggleDrawer = () => {
     setOpen(!open);
   };
-  const fileInputRef = useRef();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async () => {
+    if (!fileInputRef.current) {
+      console.error('File input ref is not defined.');
+      return;
+    }
     const files = fileInputRef.current.files;
-    if (files.length === 0) {
+    if (!files || files.length === 0) {
       alert('Please select a file to upload.');
       return;
     }
-
+  
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
         formData.append('files', files[i]);
@@ -102,7 +111,11 @@ export default function Dashboard() {
     }
   };
 
-  const triggerFileSelectPopup = () => fileInputRef.current.click();
+  const triggerFileSelectPopup = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   return (
     <ThemeProvider theme={defaultTheme}>
