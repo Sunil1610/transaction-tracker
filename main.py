@@ -1,21 +1,19 @@
-import os
 from typing import List
-from fastapi import FastAPI, File, HTTPException, UploadFile
-import subprocess
-import json
 from pathlib import Path
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
 from parsers.amazon_pay_parser import extract_transactions_from_amazon
-from parsers.splitwise_parser import extract_transactions_from_splitwise
+from parsers.email_parser import readEmails
 from parsers.pdf_extractor import extract_transactions_from_pdf
-from parsers.pdf_extractor_json import readEmails
-import dbService as db
+from parsers.splitwise_parser import extract_transactions_from_splitwise
 from parsers.text_file_parser import extract_transactions_from_text_file
 from processors.transaction_tagger import parse_transactions_to_number
-from transaction_processor import *
+from transaction_processor import insert_splitwise_expenses
+import dbService as db
 
 app = FastAPI()
 
@@ -26,7 +24,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.mount("/upload", StaticFiles(directory="ui"), name="upload")
 react_build_folder = Path(__file__).parent / "finance-app" / "build"
@@ -41,12 +38,15 @@ def serve_root(path: str):
 
 
 @app.post("/transaction/")
-def create_transaction(transaction: dict, collection:str = "transactions"):
+def create_transaction(transaction: dict, collection: str = "transactions"):
     return db.create_transaction(transaction, collection)
 
 
 @app.put("/transaction/")
-def update_transaction(query: dict, update_data: dict, collection: str = "transactions"):
+def update_transaction(
+    query: dict, update_data: dict,
+    collection: str = "transactions"
+):
     return db.update_transaction(query, update_data, collection)
 
 
@@ -60,6 +60,10 @@ def find_transactions(query: dict = {}, collection: str = "transactions"):
     return db.find_transactions(collection, query)
 
 
+@app.get("/transaction/sources")
+def find_transaction_sources():
+    return db.find_distinct("transactions", "Source")
+
 
 @app.post("/api/upload/")
 async def upload_files(files: list[UploadFile] = File(...)):
@@ -70,11 +74,15 @@ async def upload_files(files: list[UploadFile] = File(...)):
         if "pdf" in content_type:
             extract_transactions_from_pdf(file_content_as_bytes, file.filename)
         elif "text" in content_type:
-            extract_transactions_from_text_file(file_content_as_bytes, file.filename)
+            extract_transactions_from_text_file(
+                file_content_as_bytes,
+                file.filename
+            )
     return {"message": "Files uploaded successfully!"}
 
+
 @app.post("/mail/get/")
-async def upload_files(extractor: str, limit: int):
+async def read_mails(extractor: str, limit: int):
     # Logic to handle and save the uploaded files...
     readEmails(extractor, limit)
     return {"message": "Files uploaded successfully!"}
@@ -94,6 +102,7 @@ async def process_tran():
 async def upoad_splitwise_tran(splitwise_transactions: List[dict]):
     extract_transactions_from_splitwise(splitwise_transactions)
 
+
 @app.post("/api/process/splitwise")
 async def process_splitwise_expenses():
     insert_splitwise_expenses()
@@ -103,6 +112,5 @@ async def process_splitwise_expenses():
 async def tag_transactions(query: dict = {}):
     # Logic to handle and save the uploaded files...
     tag_transactions(query)
-
 
 # Add other CRUD operations as needed...

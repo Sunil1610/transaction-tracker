@@ -4,7 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import Dashboard from './dashboard/Dashboard.tsx';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 
 function App() {

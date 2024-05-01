@@ -1,0 +1,49 @@
+{
+  "mail_parser_config": {
+    "hdfc_cred_transactions": {
+      "query_string": "subject:\"alert : update on your ABCD bank credit card\"",
+      "read_attachment": "false",
+      "password": null,
+      "field": "body",
+      "regex": "r'ending (\\d+).*?for Rs (\\d+\\.\\d+) at (.*?) on (\\d{2}-\\d{2}-\\d{4}) (\\d{2}:\\d{2}:\\d{2})'",
+      "fields": [
+        "card_number",
+        "Amount",
+        "Description",
+        "Date",
+        "Time"
+      ],
+      "tran_type": "Credit",
+      "source_mapping": [
+        {
+          "card_number": "1234",
+          "Source": "ABCD_CRED_CARD"
+        },
+        {
+          "card_number": "5678",
+          "Source": "EFGH_CRED_CARD"
+        }
+      ]
+    },
+    "sbi_transactions": {
+      "query_string": "from: bank2.email ",
+      "read_attachment": "true",
+      "passwords": ["pass_1", "pass_2"],
+      "field": "body",
+      "regex": "r'ending (\\d+).*?for Rs (\\d+\\.\\d+) at (.*?) on (\\d{2}-\\d{2}-\\d{4}) (\\d{2}:\\d{2}:\\d{2})'",
+      "fields": [
+        "card_number",
+        "Amount",
+        "Description",
+        "Date",
+        "Time"
+      ],
+      "tran_type": "Credit",
+      "source_mapping": [
+        {
+          "Source": "BANK2_Transactions"
+        }
+      ]
+    }
+  }
+}

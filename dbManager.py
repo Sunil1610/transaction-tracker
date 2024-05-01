@@ -1,14 +1,15 @@
 from pymongo import MongoClient
 
+
 class DatabaseManager:
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:27017/')
-        self.db = self.client['finances_tracker']
-        self.splitwise = self.db['splitwise_entries']
-        self.transactions = self.db['transactions']
+        self.client = MongoClient("mongodb://localhost:27017/")
+        self.db = self.client["finances_tracker"]
+        self.splitwise = self.db["splitwise_entries"]
+        self.transactions = self.db["transactions"]
 
     def insert_document(self, document, collection):
-        if(self.find_document(document, collection) == None) :
+        if self.find_document(document, collection) is None:
             collection = self.get_collection(collection)
             return collection.insert_one(document)
         return document
@@ -19,11 +20,14 @@ class DatabaseManager:
 
     def find_document(self, query, collection):
         collection = self.get_collection(collection)
-        
         document = collection.find_one(query)
-        if(document != None) :
+        if document is not None:
             document.update({"_id": str(document.get("_id"))})
         return document
+
+    def find_distinct(self, field, collection):
+        collection = self.get_collection(collection)
+        return collection.distinct(field)
 
     def find_documents(self, query, collection):
         collection = self.get_collection(collection)
@@ -33,7 +37,7 @@ class DatabaseManager:
             document.update({"_id": str(document.get("_id"))})
             docs.append(document)
         return docs
-    
+
     def update_transaction(self, filter, update, collection):
         collection = self.get_collection(collection)
         return collection.update_many(filter, update)
@@ -42,8 +46,8 @@ class DatabaseManager:
         collection = self.get_collection(collection)
         return collection.delete_many(filter)
 
-    def get_collection(self, collection) :
-        if(collection == 'transactions'):
+    def get_collection(self, collection):
+        if collection == "transactions":
             return self.transactions
-        elif(collection == 'splitwise'):
+        elif collection == "splitwise":
             return self.splitwise

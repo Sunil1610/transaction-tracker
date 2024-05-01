@@ -7,11 +7,10 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import ButtonRenderer from './GridButtonRenderer.tsx';
 import './grid.css'
-import { GridApi } from 'ag-grid-community';
 
 export default function Transactions() {
   var rows: any[] = useContext(TransactionsContext);
-  const gridRef = useRef<GridApi | null>(null);
+  const gridRef = useRef<AgGridReact | null>(null);
   if (!rows) {
     rows = [];
   } else if (rows.length > 0) {
